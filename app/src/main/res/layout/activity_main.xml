@@ -17,23 +17,50 @@
         tools:listitem="@layout/stopwatch_item" />
 
     <EditText
-        android:id="@+id/editTime"
-        android:layout_width="164dp"
-        android:layout_height="61dp"
+        android:id="@+id/hours"
+        android:layout_width="49dp"
+        android:layout_height="58dp"
         android:layout_marginStart="32dp"
         android:layout_marginBottom="16dp"
         android:ems="10"
+        android:hint="00"
         android:inputType="textPersonName"
+        android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <EditText
+        android:id="@+id/minutes"
+        android:layout_width="49dp"
+        android:layout_height="58dp"
+        android:layout_marginStart="96dp"
+        android:layout_marginBottom="16dp"
+        android:ems="10"
+        android:hint="00"
+        android:inputType="textPersonName"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <EditText
+        android:id="@+id/seconds"
+        android:layout_width="49dp"
+        android:layout_height="58dp"
+        android:layout_marginStart="160dp"
+        android:layout_marginBottom="16dp"
+        android:ems="10"
+        android:hint="00"
+        android:inputType="textPersonName"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/add_new_stopwatch_button"
         android:layout_width="150dp"
         android:layout_height="59dp"
         android:layout_marginBottom="16dp"
-        android:text="Add Stopwatch"
+        android:text="Add"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.842"

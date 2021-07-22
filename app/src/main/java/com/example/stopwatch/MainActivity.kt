@@ -1,23 +1,28 @@
 package com.example.stopwatch
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.stopwatch.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity(), StopwatchListener {
+class MainActivity : AppCompatActivity(), StopwatchListener, LifecycleObserver {
 
     private lateinit var binding: ActivityMainBinding
 
     private val stopwatchAdapter = StopwatchAdapter(this)
     private val stopwatches = mutableListOf<Stopwatch>()
     private var nextId = 0
-
-    //TODO: mainActiviti
+    private var timerId = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -27,7 +32,17 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
         }
 
         binding.addNewStopwatchButton.setOnClickListener {
-            val time = binding.editTime.text.toString().toLongOrNull() ?: 0L
+            var time = binding.hours.text.toString().toLongOrNull()?.let {
+            binding.hours.text.toString().toLong() * 1000L * 60L * 60L
+        } ?: 0L
+
+            time += binding.minutes.text.toString().toLongOrNull()?.let {
+                binding.minutes.text.toString().toLong() * 1000L * 60L
+            } ?: 0L
+
+            time += binding.seconds.text.toString().toLongOrNull()?.let {
+                binding.seconds.text.toString().toLong() * 1000L
+            } ?: 0L
             stopwatches.add(Stopwatch(nextId++, time, currentMs = time, isStarted = false))
             stopwatchAdapter.submitList(stopwatches.toList())
         }
@@ -40,10 +55,6 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
     override fun stop(id: Int, currentMs: Long) {
         changeStopwatch(id, currentMs, false)
     }
-
-//    override fun reset(id: Int) {
-//        changeStopwatch(id, 0L, false)
-//    }
 
     override fun delete(id: Int) {
         stopwatches.remove(stopwatches.find { it.id == id })
@@ -66,4 +77,30 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
         stopwatches.clear()
         stopwatches.addAll(newTimers)
     }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    fun onAppBackgrounded() {
+        var startTime = stopwatchAdapter.currentList.find { it.id == timerId }?.currentMs ?: 0L
+        if (startTime > 0) {
+            val startIntent = Intent(this, ForegroundService::class.java)
+            startIntent.putExtra(COMMAND_ID, COMMAND_START)
+            startIntent.putExtra(STARTED_TIMER_TIME_MS, startTime)
+            startService(startIntent)
+        }
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    fun onAppForegrounded() {
+        val stopIntent = Intent(this, ForegroundService::class.java)
+        stopIntent.putExtra(COMMAND_ID, COMMAND_STOP)
+        startService(stopIntent)
+    }
+
+
 }
+
+    const val INVALID = "INVALID"
+    const val COMMAND_START = "COMMAND_START"
+    const val COMMAND_STOP = "COMMAND_STOP"
+    const val COMMAND_ID = "COMMAND_ID"
+    const val STARTED_TIMER_TIME_MS = "STARTED_TIMER_TIME"
