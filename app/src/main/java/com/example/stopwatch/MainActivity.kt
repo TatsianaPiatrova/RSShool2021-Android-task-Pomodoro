@@ -49,14 +49,19 @@ class MainActivity : AppCompatActivity(), StopwatchListener, LifecycleObserver {
     }
 
     override fun start(id: Int) {
+        timerId = id
         changeStopwatch(id, null, true)
     }
 
     override fun stop(id: Int, currentMs: Long) {
+        if(id == timerId)
+            timerId = -1
         changeStopwatch(id, currentMs, false)
     }
 
     override fun delete(id: Int) {
+        if(id == timerId)
+            timerId = -1
         stopwatches.remove(stopwatches.find { it.id == id })
         stopwatchAdapter.submitList(stopwatches.toList())
     }
@@ -80,7 +85,7 @@ class MainActivity : AppCompatActivity(), StopwatchListener, LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     fun onAppBackgrounded() {
-        var startTime = stopwatchAdapter.currentList.find { it.id == timerId }?.currentMs ?: 0L
+        val startTime = stopwatchAdapter.currentList.find { it.id == timerId }?.currentMs ?: 0L
         if (startTime > 0) {
             val startIntent = Intent(this, ForegroundService::class.java)
             startIntent.putExtra(COMMAND_ID, COMMAND_START)
