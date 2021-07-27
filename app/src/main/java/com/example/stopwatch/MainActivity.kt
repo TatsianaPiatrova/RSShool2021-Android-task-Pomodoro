@@ -69,13 +69,16 @@ class MainActivity : AppCompatActivity(), StopwatchListener, LifecycleObserver {
     private fun changeStopwatch(id: Int, currentMs: Long?, isStarted: Boolean) {
         val newTimers = mutableListOf<Stopwatch>()
         stopwatches.forEach {
-            if (it.id == id) {
-                newTimers.add(Stopwatch(it.id, it.time, currentMs ?: it.currentMs, isStarted, it.isFinish))
-            } else if (it.isStarted) {
-                newTimers.add(Stopwatch(it.id, it.time, currentMs ?: it.currentMs, isStarted = false, it.isFinish))
-            }
-            else {
-                newTimers.add(it)
+            when {
+                it.id == id -> {
+                    newTimers.add(Stopwatch(it.id, it.time, currentMs ?: it.currentMs, isStarted, it.isFinish))
+                }
+                it.isStarted -> {
+                    newTimers.add(Stopwatch(it.id, it.time, currentMs ?: it.currentMs, isStarted = false, it.isFinish))
+                }
+                else -> {
+                    newTimers.add(it)
+                }
             }
         }
         stopwatchAdapter.submitList(newTimers)
